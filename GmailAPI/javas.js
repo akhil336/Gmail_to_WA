@@ -10,8 +10,10 @@
       let gapiInited = false;
       let gisInited = false;
 
-      document.getElementById('authorize_button').style.visibility = 'hidden';
+      // document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
+      document.getElementById('ref_button').style.visibility = 'hidden';
+
 
     // Callback after api.js is loaded.
        
@@ -44,13 +46,21 @@
       }
 
       // Enables user interaction after all libraries are loaded.
-       
-      function maybeEnableButtons() {
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+     }
+      async function maybeEnableButtons() {
         if (gapiInited && gisInited) {
-          document.getElementById('authorize_button').style.visibility = 'visible';
+          // document.getElementById('authorize_button').style.visibility = 'visible';
+
+         console.log("Test 1")
+          handleAuthClick();
         }
       }
-
+      document.getElementById('ref_button').addEventListener("click",async ()=>
+      {
+        await displayInbox();
+      })
     //   *  Sign in the user upon button click.
 
       function handleAuthClick() {
@@ -59,9 +69,10 @@
             throw (resp);
           }
           document.getElementById('signout_button').style.visibility = 'visible';
-          document.getElementById('authorize_button').innerText = 'Refresh';
+          document.getElementById('ref_button').style.visibility = 'visible';
+          // document.getElementById('authorize_button').innerText = 'Refresh';
        // Call display function here
-       
+      
 
        await displayInbox();
 
@@ -78,6 +89,7 @@
         }
       }
 
+      
     //   Sign out the user upon button click.
     
       function handleSignoutClick() {
@@ -86,7 +98,7 @@
           google.accounts.oauth2.revoke(token.access_token);
           gapi.client.setToken('');
           document.getElementById('content').innerText = '';
-          document.getElementById('authorize_button').innerText = 'Authorize';
+          // document.getElementById('authorize_button').innerText = 'Authorize';
           document.getElementById('signout_button').style.visibility = 'hidden';
         }
       }
@@ -111,12 +123,11 @@
         
         arr.forEach(msgReqFunc);
         function msgReqFunc(item){
-            console.log(item.id);
               var messageRequest = gapi.client.gmail.users.messages.get({
                 'userId': 'me',
                 'id': item.id
               });
-              console.log("calling append msag");
+              console.log("calling append msg");
              messageRequest.execute(appMsg);
             }
           });
@@ -155,9 +166,13 @@
       async function appMsg(message)
       {
         var htmlBody = getBody(message.payload)
+        console.log(htmlBody);
+        
         //message.payload.parts.body.data is the encoded email body text, needs to be decoded by decodeURIcomponent()
+        //to get the content to index.html document page:
+
         var content = document.getElementById('content');
-        content.outerHTML = htmlBody;
+        content.innerHTML = htmlBody;
       } 
 
         
